@@ -3,5 +3,7 @@
 */Build
 */Binaries
 */Saved
+**/AutoPCH
 *.VC.db
 BuildingEscape/Content/StarterContent/
+BuildingEscape/.vs/BuildingEscape/v15/Browse.VC.opendb
