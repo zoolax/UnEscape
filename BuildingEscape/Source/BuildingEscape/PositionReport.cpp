@@ -54,7 +54,7 @@ void UPositionReport::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 	//-------
 	// ...
-	PrintLocations();
+	//PrintLocations();
 	//RotateObject();
 	//-------
 }
