@@ -5,5 +5,6 @@
 */Saved
 **/AutoPCH
 *.VC.db
+*.VC.*
 BuildingEscape/Content/StarterContent/
 BuildingEscape/.vs/BuildingEscape/v15/Browse.VC.opendb
