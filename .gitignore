@@ -6,5 +6,6 @@
 **/AutoPCH
 *.VC.db
 *.VC.*
+*/LocalDerivedDataCache
 BuildingEscape/Content/StarterContent/
 BuildingEscape/.vs/BuildingEscape/v15/Browse.VC.opendb

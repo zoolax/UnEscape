@@ -16,20 +16,15 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 	// ...
 }
-
 
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Warning, TEXT("Grabber is here"));
 	// ...
 	FindPhysicsComponent();
-
 	SetupInputComponent();
 	
 }
@@ -47,22 +42,10 @@ void UGrabber::SetupInputComponent()
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 {
-
-	//Get the player view point this thick
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation,
-		OUT PlayerViewRotation
-	);
-
 	//UE_LOG(LogTemp,Warning,TEXT(" location %s , rotation %s"), *PlayerViewPointLocation.ToString(), *PlayerViewRotation.ToString())
-	//--------
-	//Ray-cast out to reach the distance
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewRotation.Vector() *  60.f;
 	DrawDebugLine(GetWorld(),
-		PlayerViewPointLocation,
-		LineTraceEnd,
+		GetReachStartLine(),
+		GetReachEndLine(),
 		FColor(255, 0, 0),
 		false,
 		0,
@@ -71,13 +54,11 @@ const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 	//--------
 	//setup params query
 	FCollisionQueryParams TracePar(FName(TEXT("")), false, GetOwner());
-	//--------
-	// See what we have hit
 	FHitResult Hit;
 
 	GetWorld()->LineTraceSingleByObjectType(OUT Hit,
-		PlayerViewPointLocation,
-		LineTraceEnd,
+		GetReachStartLine(),
+		GetReachEndLine(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TracePar
 	);
@@ -96,7 +77,6 @@ void UGrabber::FindPhysicsComponent()
 {
 	/// Look for physicc handler
 	PhysicsHandle = GetOwner()->FindComponentByClass  <UPhysicsHandleComponent>();
-
 	//---------
 	if (PhysicsHandle)
 	{
@@ -115,22 +95,41 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	//--------
 	// ...
+	if (!PhysicsHandle)
+		return;
+
 	if (PhysicsHandle->GrabbedComponent)
 	{
-		//Get the player view point this thick
-		FVector PlayerViewPointLocation;
-		FRotator PlayerViewRotation;
-		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-			OUT PlayerViewPointLocation,
-			OUT PlayerViewRotation
-		);
-
-		FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewRotation.Vector() *  60.f;
-
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+		PhysicsHandle->SetTargetLocation(GetReachEndLine());
 	}
 
 }
+
+FVector UGrabber::GetReachEndLine()
+{
+	//Get the player view point this thick
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViewPointLocation,
+		OUT PlayerViewRotation
+	);
+	return  PlayerViewPointLocation + PlayerViewRotation.Vector() *  60.f;
+}
+
+FVector UGrabber::GetReachStartLine()
+{
+	//Get the player view point this thick
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViewPointLocation,
+		OUT PlayerViewRotation
+	);
+
+	return PlayerViewPointLocation;
+}
+
 
 void UGrabber::GrabObject()
 {
@@ -138,8 +137,6 @@ void UGrabber::GrabObject()
 	auto HitRes = GetFirstPhysicsBodyInReach();
 	auto ComponentToGrab = HitRes.GetComponent();
 	auto ActorHit = HitRes.GetActor();
-
-	UE_LOG(LogTemp,Warning,TEXT("Pressed"));
 
 	if (ActorHit)
 	{
@@ -151,11 +148,8 @@ void UGrabber::GrabObject()
 
 void UGrabber::ReleaseObject()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Released"));
-
 	if (PhysicsHandle->GrabbedComponent)
 	{
 		PhysicsHandle->ReleaseComponent();
 	}
 }
-
